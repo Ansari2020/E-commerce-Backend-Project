@@ -3,10 +3,9 @@ package org.example.ecommerce.Controller;
 
 import org.example.ecommerce.Model.Product;
 import org.example.ecommerce.Service.ProductService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,16 +21,26 @@ public class ProductController {
     }
 
     @GetMapping( "/{id}")
-    public Product getProductById(@PathVariable("id") Long id) {
-        return productService.getProductById(id);
-        //return new Product();
+    public ResponseEntity<Product> getProductById(@PathVariable("id") Long id) {
+        Product product= productService.getProductById(id);
+        ResponseEntity responseEntity;
+        if(product == null) {
+            responseEntity = new ResponseEntity<Product>(HttpStatus.NOT_FOUND);
+            return responseEntity;
+        }
+        return new ResponseEntity<>(product, HttpStatus.OK);
     }
 
 
 
     @GetMapping()
     public List<Product> getProducts() {
-        List<Product> products = new ArrayList<Product>();
-        return products;
+
+        return productService.getAllProducts();
+    }
+
+    @PutMapping("/{id}")
+    public Product replaceProduct(@PathVariable("id") Long id,@RequestBody Product product) {
+        return productService.replaceProductById(id, product);
     }
 }
