@@ -1,6 +1,7 @@
 package org.example.ecommerce.Service;
 
 import org.example.ecommerce.DTO.FakeStoreProductDto;
+import org.example.ecommerce.Exception.ProductNotFoundException;
 import org.example.ecommerce.Model.Category;
 import org.example.ecommerce.Model.Product;
 import org.springframework.http.HttpMethod;
@@ -42,15 +43,18 @@ public class FakeStoreProductService implements ProductService{
 
 
     @Override
-    public Product getProductById(Long id) {
+    public Product getProductById(Long id) throws ProductNotFoundException {
+
         FakeStoreProductDto fakeStoreProductDto=
                 restTemplate.getForObject("https://fakestoreapi.com/products/"+id,
                 FakeStoreProductDto.class);
 
+
         if(fakeStoreProductDto==null)
-            return null;
+            throw new ProductNotFoundException(id,"Product with id "+id+" not found");
 
         return fakeStoreProductDtoToProduct(fakeStoreProductDto);
+
     }
 
     @Override
@@ -87,5 +91,38 @@ public class FakeStoreProductService implements ProductService{
                 restTemplate.execute("https://fakestoreapi.com/products/"+id,
                 HttpMethod.PUT, requestCallback, responseExtractor);
         return fakeStoreProductDtoToProduct(response);
+    }
+
+    @Override
+    public void deleteProductById(Long id) {
+         restTemplate.delete("https://fakestoreapi.com/products/"+id);
+    }
+
+    @Override
+    public Product addProduct(Product product) {
+        FakeStoreProductDto fakeStoreProductDto=new FakeStoreProductDto();
+        fakeStoreProductDto.setTitle(product.getTitle());
+        fakeStoreProductDto.setPrice(product.getPrice());
+        fakeStoreProductDto.setImage(product.getImage());
+        fakeStoreProductDto.setDescription(product.getDescription());
+
+        FakeStoreProductDto response= restTemplate.postForObject("https://fakestoreapi.com/products/",
+                fakeStoreProductDto,FakeStoreProductDto.class);
+        return fakeStoreProductDtoToProduct(response);
+
+
+    }
+
+    @Override
+    public List<Product> getProductByLimit(Integer limit) {
+        FakeStoreProductDto[] fakeStoreProductDtos=restTemplate.getForObject(
+                        "https://fakestoreapi.com/products?limit="+limit,
+                            FakeStoreProductDto[].class);
+        List<Product> response=new ArrayList<>();
+        for(FakeStoreProductDto fakeStoreProductDto: fakeStoreProductDtos){
+            response.add(fakeStoreProductDtoToProduct(fakeStoreProductDto));
+        }
+        return response;
+
     }
 }
