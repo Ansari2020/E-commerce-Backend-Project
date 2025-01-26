@@ -1,28 +1,21 @@
 package org.example.ecommerce.Model;
 
 
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import lombok.Data;
 
-@Getter
-@Setter
-public class Category {
-    private Long id;
+import java.util.List;
+
+@Data
+@Entity
+public class Category extends BaseModel{
+
     private String description;
+    @OneToMany(fetch = FetchType.EAGER)
+    private List<Product> products;
 
-    public Long getId() {
-        return id;
-    }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
 }

@@ -4,6 +4,7 @@ import org.example.ecommerce.DTO.FakeStoreProductDto;
 import org.example.ecommerce.Exception.ProductNotFoundException;
 import org.example.ecommerce.Model.Category;
 import org.example.ecommerce.Model.Product;
+import org.example.ecommerce.Projection.findByTileAndDescription;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -15,7 +16,7 @@ import org.springframework.web.client.RestTemplate;
 import java.util.ArrayList;
 import java.util.List;
 
-@Service
+@Service("fakestoreproductservice")
 public class FakeStoreProductService implements ProductService{
 
     private RestTemplate restTemplate;
@@ -94,12 +95,12 @@ public class FakeStoreProductService implements ProductService{
     }
 
     @Override
-    public void deleteProductById(Long id) {
-         restTemplate.delete("https://fakestoreapi.com/products/"+id);
+    public Product updateProductById(Long id, Product product) {
+        return null;
     }
 
     @Override
-    public Product addProduct(Product product) {
+    public Product createProduct(Product product) {
         FakeStoreProductDto fakeStoreProductDto=new FakeStoreProductDto();
         fakeStoreProductDto.setTitle(product.getTitle());
         fakeStoreProductDto.setPrice(product.getPrice());
@@ -109,9 +110,14 @@ public class FakeStoreProductService implements ProductService{
         FakeStoreProductDto response= restTemplate.postForObject("https://fakestoreapi.com/products/",
                 fakeStoreProductDto,FakeStoreProductDto.class);
         return fakeStoreProductDtoToProduct(response);
-
-
     }
+
+    @Override
+    public void deleteProduct(Long id) {
+        restTemplate.delete("https://fakestoreapi.com/products/"+id);
+    }
+
+
 
     @Override
     public List<Product> getProductByLimit(Integer limit) {
@@ -124,5 +130,15 @@ public class FakeStoreProductService implements ProductService{
         }
         return response;
 
+    }
+
+    @Override
+    public findByTileAndDescription someRandommethod(Long id) {
+        return null;
+    }
+
+    @Override
+    public Product someRandomSqlQuery(Long id) {
+        return null;
     }
 }

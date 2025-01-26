@@ -1,5 +1,11 @@
 package org.example.ecommerce.Exception;
 
+
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
 public class ProductNotFoundException extends Exception {
 
     private Long id;
@@ -9,20 +15,4 @@ public class ProductNotFoundException extends Exception {
         this.id = id;
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    @Override
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
 }

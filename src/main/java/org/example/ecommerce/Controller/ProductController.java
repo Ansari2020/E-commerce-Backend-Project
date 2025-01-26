@@ -4,6 +4,7 @@ package org.example.ecommerce.Controller;
 import org.example.ecommerce.Exception.ProductNotFoundException;
 import org.example.ecommerce.Model.Product;
 import org.example.ecommerce.Service.ProductService;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,7 +17,7 @@ public class ProductController {
 
     private ProductService productService;
 
-    ProductController(ProductService productService) {
+    ProductController(@Qualifier("selfproductservice") ProductService productService) {
         this.productService = productService;
     }
 
@@ -54,7 +55,6 @@ public class ProductController {
         }
         return new ResponseEntity<>(products, HttpStatus.OK);
 
-
     }
 
     @PutMapping("/{id}")
@@ -81,17 +81,13 @@ public class ProductController {
             responseEntity = new ResponseEntity<Product>(HttpStatus.NOT_FOUND);
             return responseEntity;
         }
-        productService.deleteProductById(id);
+        productService.deleteProduct(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 
     }
-
     @PostMapping("/")
-    public ResponseEntity<Product> addProduct(@RequestBody Product product) {
-        Product product1= productService.addProduct(product);
-        ResponseEntity responseEntity;
-        return new ResponseEntity<>(product1,HttpStatus.CREATED);
-
+    public Product createProduct(@RequestBody Product product) throws ProductNotFoundException {
+        return productService.createProduct(product);
 
     }
 
