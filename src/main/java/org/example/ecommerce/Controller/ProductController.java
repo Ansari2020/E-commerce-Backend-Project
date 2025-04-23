@@ -1,10 +1,15 @@
 package org.example.ecommerce.Controller;
 
 
+import org.example.ecommerce.DTO.UserDto;
 import org.example.ecommerce.Exception.ProductNotFoundException;
 import org.example.ecommerce.Model.Product;
+import org.example.ecommerce.Projection.findByTileAndDescription;
+import org.example.ecommerce.Repository.ProductRepository;
 import org.example.ecommerce.Service.ProductService;
 import org.springframework.beans.factory.annotation.Qualifier;
+
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,50 +20,47 @@ import java.util.List;
 @RequestMapping("/products")
 public class ProductController {
 
-    private ProductService productService;
 
-    ProductController(@Qualifier("selfproductservice") ProductService productService) {
+    private final ProductRepository productRepository;
+    private ProductService productService;
+    //private AuthCommon authCommon;
+
+    ProductController(@Qualifier("fakestoreproductservice") ProductService productService,
+                      ProductRepository productRepository
+                      ) {
+        //AuthCommon authCommon
         this.productService = productService;
+        this.productRepository = productRepository;
+       // this.authCommon = authCommon;
     }
 
     @GetMapping( "/{id}")
     public ResponseEntity<Product> getProductById(@PathVariable("id") Long id) throws ProductNotFoundException {
-//        ResponseEntity<Product> response=null;
-//        try {
-//            Product product = productService.getProductById(id);
-//            response = new ResponseEntity<>(product, HttpStatus.OK);
-//
-//        }
-//        catch (ArithmeticException e) {
-//            response= new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-//        }
-//        return response;
-        Product product= productService.getProductById(id);
-        ResponseEntity<Product> responseEntity;
-//        if(product == null) {
-//            responseEntity = new ResponseEntity<Product>(HttpStatus.NOT_FOUND);
-//            return responseEntity;
-//        }
-        return new ResponseEntity<>(product, HttpStatus.OK);
+
+
+            //UserDto userDto = authCommon.validateToken(token);
+            ResponseEntity<Product> responseEntity;
+
+//            if (userDto == null) {
+//                responseEntity = new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+//                return responseEntity;
+//            }
+            Product product= productService.getProductById(id);
+            return responseEntity=new ResponseEntity<>(product,HttpStatus.OK);
+
 
     }
 
+    @GetMapping()
+    public Page<Product> getProducts(@RequestParam("pageNumber") int pageNumber,
+                                     @RequestParam("pageSize") int pageSize) {
+        return productService.getAllProducts(pageNumber, pageSize);
 
-
-    @GetMapping("/")
-    public ResponseEntity<List<Product>> getProducts() {
-        List<Product> products= productService.getAllProducts();
-        ResponseEntity responseEntity;
-        if(products == null) {
-            responseEntity = new ResponseEntity<List<Product>>(HttpStatus.NOT_FOUND);
-            return responseEntity;
-        }
-        return new ResponseEntity<>(products, HttpStatus.OK);
 
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Product> replaceProduct(@PathVariable("id") Long id,@RequestBody Product product) throws ProductNotFoundException {
+    public ResponseEntity<Product> update(@PathVariable("id") Long id,@RequestBody Product product) throws ProductNotFoundException {
 
         Product product2= productService.getProductById(id);
         ResponseEntity responseEntity;
@@ -66,7 +68,7 @@ public class ProductController {
             responseEntity = new ResponseEntity<Product>(HttpStatus.NOT_FOUND);
             return responseEntity;
         }
-        Product product1= productService.replaceProductById(id, product);
+        Product product1= productService.updateProductById(id, product);
 
         return new ResponseEntity<>(product1,HttpStatus.OK);
 
@@ -91,8 +93,16 @@ public class ProductController {
 
     }
 
-    @GetMapping()
-    public List<Product> getProductByLimit(@RequestParam Integer limit) {
-        return productService.getProductByLimit(limit);
+//    localhost:8080/products?limit=2
+//    @GetMapping()
+//    public List<Product> getProductByLimit(@RequestParam(defaultValue = "2") Integer limit) {
+//        return productService.getLimitedProducts(limit);
+//    }
+
+//    find some attributes with id
+    @GetMapping("TD/{id}")
+    public findByTileAndDescription findByTitleAndDescription(@PathVariable("id") Long id){
+       findByTileAndDescription findByTileAndDescription=productRepository.someRandommethod(id);
+       return findByTileAndDescription;
     }
 }

@@ -7,23 +7,33 @@ import org.example.ecommerce.Model.Product;
 import org.example.ecommerce.Projection.findByTileAndDescription;
 import org.example.ecommerce.Repository.CategoryRepository;
 import org.example.ecommerce.Repository.ProductRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Primary;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 
 @Service("selfproductservice")
-//@Primary
+@Primary
 public class SelfProductService implements ProductService {
+    private final ProductService productService;
     private ProductRepository productRepository;
     private CategoryRepository categoryRepository;
 
+    @Autowired
     public SelfProductService(
             ProductRepository productRepository,
-            CategoryRepository categoryRepository) {
+            CategoryRepository categoryRepository,
+             ProductService productService) {
         this.productRepository = productRepository;
         this.categoryRepository = categoryRepository;
+        this.productService = productService;
     }
 
     @Override
@@ -36,27 +46,35 @@ public class SelfProductService implements ProductService {
     }
 
     @Override
-    public List<Product> getAllProducts() {
-        return productRepository.findAll();
+    public Page<Product> getAllProducts(int pageNumber, int pageSize) {
+        return productRepository.findAll(PageRequest.of(pageNumber, pageSize,
+                Sort.by("price").ascending().
+                        and(Sort.by("title").descending())));
     }
 
-    @Override
-    public Product replaceProductById(Long id, Product product) {
-        return null;
-    }
 
     @Override
-    public Product updateProductById(Long id, Product product) {
-        return null;
+    public Product updateProductById(Long id, Product product) throws ProductNotFoundException {
+        Optional<Product> productOptional = productRepository.findById(id);
+        if (productOptional.isEmpty()) {
+            throw new ProductNotFoundException(id,"Product not found");
+        }
+        Product productToUpdate = productOptional.get();
+        productToUpdate.setTitle(product.getTitle());
+        productToUpdate.setDescription(product.getDescription());
+        productToUpdate.setPrice(product.getPrice());
+        productToUpdate.setCategory(product.getCategory());
+        productRepository.save(productToUpdate);
+        return productToUpdate;
     }
 
     @Override
     public Product createProduct(Product product) {
         Category category = product.getCategory();
-        if(category.getId() == null) {
-            Category savedCategory = categoryRepository.save(category);
-            product.setCategory(savedCategory);
-        }
+//        if(category.getId() == null) {
+//            Category savedCategory = categoryRepository.save(category);
+//            product.setCategory(savedCategory);
+//        }
         Product savedProduct=productRepository.save(product);
         Optional<Category> optionalCategory=categoryRepository.findById(savedProduct.getCategory().getId());
         Category category1=optionalCategory.get();
@@ -71,17 +89,12 @@ public class SelfProductService implements ProductService {
     }
 
     @Override
-    public List<Product> getProductByLimit(Integer limit) {
-        return List.of();
+    public List<Product> getLimitedProducts(Integer limit) {
+        return productRepository.findAll().subList(0, limit);
     }
 
-    @Override
-    public findByTileAndDescription someRandommethod(Long id) {
-        return null;
+    public findByTileAndDescription findByTileAndDescription(@Param("id") Long id) {
+        return productRepository.someRandommethod(id);
     }
 
-    @Override
-    public Product someRandomSqlQuery(Long id) {
-        return null;
-    }
 }
